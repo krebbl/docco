@@ -12,9 +12,10 @@ To start using Docco you just need a server with a domain and docker + docker co
 
 ## Installation
 
-Add the following `docker-compose.yml` file to your server, configure the `DEFAULT_EMAIL` and the `authorized_keys` settings and start it via `docker compose up -d`.
-
 ### 1. Start Docco with Docker-Compose
+
+Add the following `docker-compose.yml` file to your server, configure the `DEFAULT_EMAIL`
+and the `authorized_keys` settings and start it via `docker compose up -d`.
 
 ```yaml
 version: "3"
