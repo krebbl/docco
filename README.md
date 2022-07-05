@@ -68,7 +68,7 @@ volumes:
 
 This will start an NGINX server and a letsencrypt proxy that will serve your project via HTTPS and a custom domain.
 
-When the container is up and running you can start using docco
+When the container is up and running you can start using docco.
 
 ### 2. Create your first app
 
@@ -76,21 +76,21 @@ On your locale machine you can now run the following commands to create your fir
 
 ```
 # List all docco commands
-ssh docco@<IP>:<PORT> -p 2222
+$ ssh docco@<IP>:<PORT> -p 2222
 
 # Create your first app
-ssh docco@<IP>:<PORT> -p 2222 apps create foobar
+$ ssh docco@<IP>:<PORT> -p 2222 apps create foobar
 
 # Set the DOMAIN for your app "foobar"
-ssh docco@<IP>:<PORT> -p 2222 config set foobar DOMAIN=foobar.apps.myserver.com
+$ ssh docco@<IP>:<PORT> -p 2222 config set foobar DOMAIN=foobar.apps.myserver.com
 ```
 
 **Hint:** Make sure that your DNS entries for the server are set up correctly. The best way is to
-use a wildcard DNS entry like "*.apps.myserver.com".
+use a wildcard DNS entry like **\*.apps.myserver.com**.
 
 ### 3. Deploy your app
 
-Now you can push your project to your server:
+Now you can push your project to the server:
 
 ```
 # go to your project you want to deploy
@@ -111,7 +111,7 @@ Go to **foobar.apps.myserver.com** and check out if everything is working.
 If you want to destroy/remove your app you can run:
 
 ```
-ssh docco@<IP>:<PORT> -p 2222 apps destroy foobar
+$ ssh docco@<IP>:<PORT> -p 2222 apps destroy foobar
 ```
 
 
