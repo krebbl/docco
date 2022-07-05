@@ -1,10 +1,20 @@
+# What is Docco?
 
-Docco is a docker image that aims to provide an easy way to deploy docker-compose files on a remote machine in combination with a virtual host name and options to configure the containers.
+Docco is a docker image that aims to provide an easy way to deploy projects to a custom domain with a docker-compose file by just using `git push`.
 
-# Usage
+The project is heavily inspired by the Heroku CLI and Dokku which make it very convenient to deploy Docker images or projects with a Dockerfile but do not support docker compose.
 
-Add the following `docker-compose.yml` file on your server, configure the `DEFAULT_EMAIL` and the `authorized_keys` settings and start it via `docker compose up -d`.
+# Getting started
 
+## System Requirements
+
+To start using Docco you just need a server with a domain and docker + docker compose installed.
+
+## Installation
+
+Add the following `docker-compose.yml` file to your server, configure the `DEFAULT_EMAIL` and the `authorized_keys` settings and start it via `docker compose up -d`.
+
+### 1. Start Docco with Docker-Compose
 
 ```yaml
 version: "3"
@@ -56,33 +66,53 @@ volumes:
   docco-apps:
 ```
 
-When the container is up and running you can start using docco:
+This will start an NGINX server and a letsencrypt proxy that will serve your project via HTTPS and a custom domain.
 
-To list all docco commands run:
+When the container is up and running you can start using docco
 
-`ssh docco@<IP>:<PORT> -p 2222`
+### 2. Create your first app
 
-Now you first need to create an app by running:
+On your locale machine you can now run the following commands to create your first app:
 
-`ssh docco@<IP>:<PORT> -p 2222 apps create foobar`.
+```
+# List all docco commands
+ssh docco@<IP>:<PORT> -p 2222
 
-This will create a remote git repository where you can push your project.
+# Create your first app
+ssh docco@<IP>:<PORT> -p 2222 apps create foobar
 
-But before this we want to set a DOMAIN for the project. Therefor we run:
+# Set the DOMAIN for your app "foobar"
+ssh docco@<IP>:<PORT> -p 2222 config set foobar DOMAIN=foobar.apps.myserver.com
+```
 
-`ssh docco@<IP>:<PORT> -p 2222 config set foobar DOMAIN=foobar.apps.myserver.com`.
+**Hint:** Make sure that your DNS entries for the server are set up correctly. The best way is to
+use a wildcard DNS entry like "*.apps.myserver.com".
 
-Hint: Make sure that your DNS entries for the server are set up correctly. The best is to use a wildcard DNS entry like "*.apps.myserver.com".
+### 3. Deploy your app
 
 Now you can push your project to your server:
 
 ```
+# go to your project you want to deploy
+
 # add origin to your local git directory
 $ git remote add docco docco@<IP>:<PORT>/git/foobar
+
+# push your code to docco
 $ git push origin docco
 ```
 
-Docco will then look for a docker-compose file and start the containers under defined domain.
+Docco will then look for a `docker-compose.yml` file and start the containers under defined domain.
+
+Go to **foobar.apps.myserver.com** and check out if everything is working.
+
+### 4. Destroy your app
+
+If you want to destroy/remove your app you can run:
+
+```
+ssh docco@<IP>:<PORT> -p 2222 apps destroy foobar
+```
 
 
 
