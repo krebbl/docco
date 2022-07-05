@@ -151,7 +151,7 @@ To configure your app you can pass ENV vars to your docker compose file with the
 $ ssh docco@<IP>:<PORT> -p 2222 config set foobar VAR1=foo VAR2=bar
 ```
 
-This ENV vars can then be used inside the docker compose file and passed on to the different containers that are defined. For example:
+These ENV vars can then be used inside the docker compose file and passed on to the different containers that are defined. For example:
 
 ```yaml
     #...
