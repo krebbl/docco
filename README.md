@@ -42,9 +42,10 @@ services:
       - docco-git:/git
       - docco-apps:/root/apps
 
-#networks:
-#  default:
-#    external: true
+networks:
+  default:
+    external: true
+    name: nginx-proxy
 
 volumes:
   letsencrypt-certs:
