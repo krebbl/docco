@@ -24,7 +24,7 @@ RUN mkdir .ssh && chmod 700 .ssh
 COPY docco docco
 COPY scripts scripts
 COPY lib lib
-COPY Gemfile Gemfile.lock base_cli.rb ./
+COPY Gemfile Gemfile.lock ./
 RUN ln -s scripts git-shell-commands
 COPY docco-docker.env docco.env
 RUN bundle config set --local path 'vendor/bundle'
