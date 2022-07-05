@@ -91,7 +91,35 @@ use a wildcard DNS entry like **\*.apps.myserver.com**.
 
 ### 3. Deploy your app
 
-Now you can push your project to the server:
+Before you can deploy your app you need to adjust your docker-compose file in the following way:
+
+1. Add the external network nginx-proxy
+2. Set the ENV vars for the custom domain and letsencrypt host
+3. Add the nginx-proxy network to your app
+
+Example:
+
+```yaml
+    myapp:
+      image: wordpress:latest
+      networks:
+        - nginx # add the nginx network
+      expose:
+        - 80
+      restart: unless-stopped
+      environment:
+        VIRTUAL_HOST: $DOMAIN # set the virtual host
+        LETSENCRYPT_HOST: $DOMAIN # set the letsencrypt host
+    # ...
+    # under networks
+    networks:
+      # add the nginx network
+      nginx:
+        external: true
+        name: nginx-proxy
+```
+
+Now you can simply push your project to the server:
 
 ```
 # go to your project you want to deploy
@@ -103,7 +131,7 @@ $ git remote add docco docco@<IP>:<PORT>/git/foobar
 $ git push origin docco
 ```
 
-Docco will then look for a `docker-compose.yml` file and start the containers under defined domain.
+Docco will then look for a `docker-compose.yml` file and start the containers under the defined domain.
 
 Go to **foobar.apps.myserver.com** and check out if everything is working.
 
@@ -113,6 +141,34 @@ If you want to destroy/remove your app you can run:
 
 ```
 $ ssh docco@<IP>:<PORT> -p 2222 apps destroy foobar
+```
+
+### 5. Configure your app
+
+To configure your app you can pass ENV vars to your docker compose file with the `config` command:
+
+```
+$ ssh docco@<IP>:<PORT> -p 2222 config set foobar VAR1=foo VAR2=bar
+```
+
+This ENV vars can then be used inside the docker compose file and passed on to the different containers that are defined. For example:
+
+```yaml
+    #...
+    wordpress:
+        depends_on:
+          - db_node_domain
+        image: wordpress:latest
+        networks:
+          - db
+          - nginx
+        expose:
+          - 80
+        restart: unless-stopped
+        environment:
+          FOO: $VAR1
+          BAR: $VAR2
+  #...
 ```
 
 
