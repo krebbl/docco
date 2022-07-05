@@ -28,7 +28,7 @@ class AppsCLI < BaseCLI
     # install post receive hook
     File.write(post_receive_file, <<~SCRIPT
       #!/bin/bash
-      #{ENV["DOCCO_HOME_DIR"]}/docco apps update "#{app_name}"
+      cd #{ENV["DOCCO_HOME_DIR"]} && ./apps update "#{app_name}"
     SCRIPT
     )
 
