@@ -1,0 +1,18 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    dotenv (2.7.6)
+    thor (1.2.1)
+
+PLATFORMS
+  x86_64-darwin-20
+
+DEPENDENCIES
+  dotenv
+  thor
+
+RUBY VERSION
+   ruby 3.1.1p18
+
+BUNDLED WITH
+   2.3.7

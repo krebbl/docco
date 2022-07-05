@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+printf '%s\n' "Hi! Welcome to docco"
+
+# show docco usage
+$(dirname "$0")/../docco

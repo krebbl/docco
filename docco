@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+if [ -z "$DOCCO_HOME_DIR" ]; then
+    source $(dirname "$0")/docco.env
+fi
+
+usage() {
+    echo "Usage: docco command"
+}
+
+ARGS=$#
+
+if [ $ARGS == 0 ]; then
+    usage
+    echo ""
+    echo "Commands"
+fi
+
+for file in $DOCCO_HOME_DIR/scripts/*
+do
+    if [[ -f $file ]]; then
+        script=$(basename $file)
+        if [[ "$script" != "no-interactive-login" ]]; then
+          if [ $ARGS == 0 ]; then
+            echo "  $script"
+          fi
+        fi
+    fi
+done
+
