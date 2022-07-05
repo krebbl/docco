@@ -28,7 +28,7 @@ class AppsCLI < BaseCLI
     # install post receive hook
     File.write(post_receive_file, <<~SCRIPT
       #!/bin/bash
-      cd #{ENV["DOCCO_HOME_DIR"]} && ./apps update "#{app_name}"
+      cd #{ENV["DOCCO_HOME_DIR"]}/scripts && ./apps update "#{app_name}"
     SCRIPT
     )
 
@@ -51,7 +51,7 @@ class AppsCLI < BaseCLI
     if File.exists?(app_dir)
         if File.exists?(File.join(app_dir, "docker-compose.yml"))
             puts "Running docker-compose down"
-            `cd #{app_dir} && sudo docker-compose down --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} -v --remove-orphans`
+            `cd #{app_dir} && sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} down -v --remove-orphans`
         end
         puts "Removing directory"
         FileUtils.rm_rf(app_dir)
