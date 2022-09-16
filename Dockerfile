@@ -1,7 +1,7 @@
 FROM ruby:3.1.1-alpine
 
 RUN apk fix \
-    && apk --update add git git-lfs openssh docker-compose bash sudo
+    && apk --update add git git-lfs openssh docker-compose bash sudo docker
 
 RUN mkdir -p /root/.ssh \
     && chmod 700 /root/.ssh \
