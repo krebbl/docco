@@ -82,7 +82,7 @@ class AppsCLI < BaseCLI
     `GIT_DIR="#{app_dir}/.git" git pull origin main`
 
     puts "Starting app"
-    `cd #{app_dir} && sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} up -d`
+    `cd #{app_dir} && sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} up -d --build`
   end
 
   desc "list", "List all apps"
