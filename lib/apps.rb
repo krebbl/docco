@@ -51,7 +51,7 @@ class AppsCLI < BaseCLI
     if File.exists?(app_dir)
         if File.exists?(File.join(app_dir, "docker-compose.yml"))
             puts "Running docker-compose down"
-            `cd #{app_dir} && sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} down -v --remove-orphans`
+            puts `cd #{app_dir} && sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} down -v --remove-orphans`
         end
         puts "Removing directory"
         FileUtils.rm_rf(app_dir)
@@ -79,10 +79,12 @@ class AppsCLI < BaseCLI
       exit 1
     end
 
-    `GIT_DIR="#{app_dir}/.git" git pull origin main`
+    puts `GIT_DIR="#{app_dir}/.git" git fetch`
+    puts `GIT_DIR="#{app_dir}/.git" git reset --hard`
+    puts `GIT_DIR="#{app_dir}/.git" git pull origin main`
 
     puts "Starting app"
-    `cd #{app_dir} && sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} up -d --build`
+    puts `cd #{app_dir} && sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} up -d --build`
   end
 
   desc "list", "List all apps"
