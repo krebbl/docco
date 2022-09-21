@@ -24,15 +24,15 @@ class AppsCLI < BaseCLI
     # create empty config
     `touch #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME}`
 
-    post_receive_file = File.join(git_dir,"hooks/post-receive")
+    post_update_file = File.join(git_dir,"hooks/post-update")
     # install post receive hook
-    File.write(post_receive_file, <<~SCRIPT
+    File.write(post_update_file, <<~SCRIPT
       #!/bin/bash
       cd #{ENV["DOCCO_HOME_DIR"]}/scripts && ./apps update "#{app_name}"
     SCRIPT
     )
 
-    FileUtils.chmod("+x", post_receive_file)
+    FileUtils.chmod("+x", post_update_file)
 
     puts "You can now push your changes to ssh://docco@<IP>:<PORT>/git/#{app_name}"
   end
@@ -79,12 +79,14 @@ class AppsCLI < BaseCLI
       exit 1
     end
 
-    puts `GIT_DIR="#{app_dir}/.git" git fetch`
-    puts `GIT_DIR="#{app_dir}/.git" git reset --hard`
-    puts `GIT_DIR="#{app_dir}/.git" git pull origin main`
-
-    puts "Starting app"
-    puts `cd #{app_dir} && sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} up -d --build`
+    # update branch
+    puts %x{
+      cd #{app_dir}
+      env -i git fetch
+      env -i git reset --hard origin/main
+      echo "Starting app"
+      sudo docker-compose --env-file #{git_dir}/#{ConfigCLI::CONFIG_FILE_NAME} up -d --build
+    }
   end
 
   desc "list", "List all apps"
