@@ -18,7 +18,7 @@ Add the following `docker-compose.yml` file to your server, configure the `DEFAU
 and the `authorized_keys` settings and start it via `docker compose up -d`.
 
 ```yaml
-version: "3"
+version: "3.8"
 services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy
@@ -69,7 +69,7 @@ volumes:
 
 This will start an NGINX server and a letsencrypt proxy that will serve your project via HTTPS and a custom domain.
 
-When the container is up and running you can start using docco.
+When the container is up and running you can start using Docco.
 
 ### 2. Create your first app
 
@@ -77,13 +77,16 @@ On your locale machine you can now run the following commands to create your fir
 
 ```
 # List all docco commands
-$ ssh docco@<IP>:<PORT> -p 2222
+$ ssh docco@<IP> -p 2222
 
 # Create your first app
-$ ssh docco@<IP>:<PORT> -p 2222 apps create foobar
+$ ssh docco@<IP> -p 2222 apps create foobar
 
 # Set the DOMAIN for your app "foobar"
-$ ssh docco@<IP>:<PORT> -p 2222 config set foobar DOMAIN=foobar.apps.myserver.com
+$ ssh docco@<IP> -p 2222 config set foobar DOMAIN=foobar.apps.myserver.com
+
+# To set multiple DOMAINS just separate them via ,
+$ ssh docco@<IP> -p 2222 config set foobar DOMAIN=foobar.apps.myserver.com,foobar2.apps.myserver.com
 ```
 
 **Hint:** Make sure that your DNS entries for the server are set up correctly. The best way is to
@@ -91,7 +94,7 @@ use a wildcard DNS entry like **\*.apps.myserver.com**.
 
 ### 3. Deploy your app
 
-Before you can deploy your app you need to adjust your docker-compose file in the following way:
+Before you are ready to deploy your app you need to adjust your docker-compose file in the following way:
 
 1. Add the external network nginx-proxy
 2. Set the ENV vars for the custom domain and letsencrypt host
@@ -100,23 +103,25 @@ Before you can deploy your app you need to adjust your docker-compose file in th
 Example:
 
 ```yaml
-    myapp:
-      image: wordpress:latest
-      networks:
-        - nginx # add the nginx network
-      expose:
-        - 80
-      restart: unless-stopped
-      environment:
-        VIRTUAL_HOST: $DOMAIN # set the virtual host
-        LETSENCRYPT_HOST: $DOMAIN # set the letsencrypt host
-    # ...
-    # under networks
+version: "3.8"
+services:
+  myapp:
+    image: wordpress:latest
     networks:
-      # add the nginx network
-      nginx:
-        external: true
-        name: nginx-proxy
+      - nginx # add the nginx network
+    expose:
+      - 80
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: $DOMAIN # set the virtual host
+      LETSENCRYPT_HOST: $DOMAIN # set the letsencrypt host
+  # ...
+  # under networks
+  networks:
+    # add the nginx network
+    nginx:
+      external: true
+      name: nginx-proxy
 ```
 
 Now you can simply push your project to the server:
@@ -124,23 +129,24 @@ Now you can simply push your project to the server:
 ```
 # go to your project you want to deploy
 
-# add origin to your local git directory
-$ git remote add docco docco@<IP>:<PORT>/git/foobar
+# add the docco remote repository
+$ git remote add docco docco@<IP>:2222/git/foobar
 
 # push your code to docco
-$ git push origin docco
+$ git push docco main
 ```
 
-Docco will then look for a `docker-compose.yml` file and start the containers under the defined domain.
+Once pushed Docco will look for a `docker-compose.yml` file and start the containers under the defined domain.
 
 Go to **foobar.apps.myserver.com** and check out if everything is working.
+(It takes some seconds to generate the SSL certificates)
 
 ### 4. Destroy your app
 
-If you want to destroy/remove your app you can run:
+If you want to destroy or remove your app you can run:
 
 ```
-$ ssh docco@<IP>:<PORT> -p 2222 apps destroy foobar
+$ ssh docco@<IP> -p 2222 apps destroy foobar
 ```
 
 ### 5. Configure your app
@@ -148,10 +154,10 @@ $ ssh docco@<IP>:<PORT> -p 2222 apps destroy foobar
 To configure your app you can pass ENV vars to your docker compose file with the `config` command:
 
 ```
-$ ssh docco@<IP>:<PORT> -p 2222 config set foobar VAR1=foo VAR2=bar
+$ ssh docco@<IP> -p 2222 config set foobar VAR1=foo VAR2=bar
 ```
 
-These ENV vars can then be used inside the docker compose file and passed on to the different containers that are defined. For example:
+These configured ENV vars can be used inside the docker compose file and passed on to the different containers that are defined. For example:
 
 ```yaml
     #...
