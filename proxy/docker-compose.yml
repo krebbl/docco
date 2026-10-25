@@ -7,6 +7,16 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1.0
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - letsencrypt-certs:/etc/nginx/certs
@@ -17,6 +27,12 @@ services:
     container_name: letsencrypt-proxy
     networks:
       - nginx-proxy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1.0
+    logging: *default-logging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - letsencrypt-certs:/etc/nginx/certs
@@ -24,13 +40,16 @@ services:
       - letsencrypt-html:/usr/share/nginx/html
       - acme:/etc/acme.sh
     environment:
-      - DEFAULT_EMAIL=krebbl@gmail.com
+      - DEFAULT_EMAIL=${ACME_DEFAULT_EMAIL:?set ACME_DEFAULT_EMAIL in .env}
       - NGINX_PROXY_CONTAINER=nginx-proxy
   docker-socket-proxy:
     image: tecnativa/docker-socket-proxy
     privileged: true
     networks:
       - docker-proxy
+    restart: unless-stopped
+    mem_limit: 256m
+    logging: *default-logging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -49,6 +68,12 @@ services:
       - docker-proxy
     ports:
       - "2222:22"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 2.0
+    logging: *default-logging
     volumes:
       - ./authorized_keys:/home/docco/.ssh/authorized_keys:ro
       - docco-git:/git

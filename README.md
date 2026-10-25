@@ -41,12 +41,22 @@ services:
       - letsencrypt-html:/usr/share/nginx/html
       - acme:/etc/acme.sh
     environment:
-      - DEFAULT_EMAIL=admin@server.com
+      - DEFAULT_EMAIL=${ACME_DEFAULT_EMAIL:?set ACME_DEFAULT_EMAIL in .env}
       - NGINX_PROXY_CONTAINER=nginx-proxy
   docco:
     image: krebbl/docco
     ports:
       - "2222:22"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 2.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - /root/.ssh/authorized_keys:/home/docco/.ssh/authorized_keys:ro
       - docco-git:/git
