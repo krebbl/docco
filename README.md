@@ -14,8 +14,27 @@ To start using Docco you just need a server with a domain and docker + docker co
 
 ### 1. Start Docco with Docker-Compose
 
-Add the following `docker-compose.yml` file to your server, configure the `DEFAULT_EMAIL`
-and the `authorized_keys` settings and start it via `docker compose up -d`.
+Add the following `docker-compose.yml` file to your server, configure the `authorized_keys`
+settings and start it via `docker compose up -d`.
+
+To run docco without the bundled NGINX/letsencrypt proxy (e.g. you already have your own
+reverse proxy or don't need HTTPS), start only the core services — no `ACME_DEFAULT_EMAIL`
+needed:
+
+```
+docker compose up -d
+```
+
+To include the NGINX proxy and letsencrypt certificate companion, set `ACME_DEFAULT_EMAIL`
+(copy `proxy/.env.example` to `proxy/.env`) and enable the `proxy` profile:
+
+```
+docker compose --profile proxy up -d
+```
+
+The proxy services and their certificate volumes then start alongside docco.
+The app compose files below assume the `nginx-proxy` network exists — when running
+without the profile, your own reverse proxy must attach apps to it.
 
 ```yaml
 version: "3.8"
@@ -23,6 +42,7 @@ services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
+    profiles: ["proxy"]
     ports:
       - "80:80"
       - "443:443"
@@ -34,6 +54,7 @@ services:
   letsencrypt-proxy:
     image: nginxproxy/acme-companion
     container_name: letsencrypt-proxy
+    profiles: ["proxy"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - letsencrypt-certs:/etc/nginx/certs
@@ -41,7 +62,7 @@ services:
       - letsencrypt-html:/usr/share/nginx/html
       - acme:/etc/acme.sh
     environment:
-      - DEFAULT_EMAIL=${ACME_DEFAULT_EMAIL:?set ACME_DEFAULT_EMAIL in .env}
+      - DEFAULT_EMAIL=${ACME_DEFAULT_EMAIL:-}
       - NGINX_PROXY_CONTAINER=nginx-proxy
   docco:
     image: krebbl/docco

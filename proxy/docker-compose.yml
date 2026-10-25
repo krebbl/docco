@@ -2,6 +2,7 @@ services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
+    profiles: ["proxy"]
     networks:
       - nginx-proxy
     ports:
@@ -25,6 +26,7 @@ services:
   letsencrypt-proxy:
     image: nginxproxy/acme-companion
     container_name: letsencrypt-proxy
+    profiles: ["proxy"]
     networks:
       - nginx-proxy
     restart: unless-stopped
@@ -40,7 +42,7 @@ services:
       - letsencrypt-html:/usr/share/nginx/html
       - acme:/etc/acme.sh
     environment:
-      - DEFAULT_EMAIL=${ACME_DEFAULT_EMAIL:?set ACME_DEFAULT_EMAIL in .env}
+      - DEFAULT_EMAIL=${ACME_DEFAULT_EMAIL:-}
       - NGINX_PROXY_CONTAINER=nginx-proxy
   docker-socket-proxy:
     image: tecnativa/docker-socket-proxy
