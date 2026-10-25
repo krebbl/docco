@@ -1,7 +1,7 @@
 FROM ruby:3.1.1-alpine
 
 RUN apk fix \
-    && apk --update add git git-lfs openssh docker-compose bash sudo docker
+    && apk --update add git git-lfs openssh docker-compose bash docker
 
 RUN mkdir -p /root/.ssh \
     && chmod 700 /root/.ssh \
@@ -11,11 +11,7 @@ RUN mkdir -p /root/.ssh \
 RUN addgroup -S docco \
     && adduser -G docco -h /home/docco \
     -s /usr/bin/git-shell -D docco \
-    && passwd -u docco \
-    && adduser docco wheel \
-    && mkdir -p /etc/sudoers.d \
-    && echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/wheel \
-    && chmod 0440 /etc/sudoers.d/wheel
+    && passwd -u docco
 
 WORKDIR /home/docco
 
@@ -30,7 +26,9 @@ COPY docco-docker.env docco.env
 RUN bundle config set --local path 'vendor/bundle'
 RUN bundle install -j4
 RUN chown -R docco:docco /home/docco
-RUN sudo -u docco bundle config set --local path 'vendor/bundle'
+USER docco
+RUN bundle config set --local path 'vendor/bundle'
+USER root
 
 COPY sshd_config /etc/ssh/sshd_config
 COPY start.sh start.sh

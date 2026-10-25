@@ -1,8 +1,9 @@
-version: "3"
 services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
+    networks:
+      - nginx-proxy
     ports:
       - "80:80"
       - "443:443"
@@ -14,6 +15,8 @@ services:
   letsencrypt-proxy:
     image: nginxproxy/acme-companion
     container_name: letsencrypt-proxy
+    networks:
+      - nginx-proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - letsencrypt-certs:/etc/nginx/certs
@@ -23,20 +26,40 @@ services:
     environment:
       - DEFAULT_EMAIL=krebbl@gmail.com
       - NGINX_PROXY_CONTAINER=nginx-proxy
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    privileged: true
+    networks:
+      - docker-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # only what lib/apps.rb needs: docker-compose up --build / down -v
+      - POST=1        # also gates DELETE (down -v)
+      - BUILD=1
+      - SESSION=1     # buildkit
+      - CONTAINERS=1
+      - IMAGES=1
+      - NETWORKS=1
+      - VOLUMES=1
+      - INFO=1
   docco:
     image: krebbl/docco
+    networks:
+      - docker-proxy
     ports:
       - "2222:22"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./authorized_keys:/home/docco/.ssh/authorized_keys:ro
       - docco-git:/git
       - docco-apps:/home/docco/apps
 
 networks:
-  default:
+  nginx-proxy:
     external: true
     name: nginx-proxy
+  docker-proxy:
+    internal: true
 
 volumes:
   letsencrypt-certs:

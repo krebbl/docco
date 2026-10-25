@@ -48,15 +48,35 @@ services:
     ports:
       - "2222:22"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /root/.ssh/authorized_keys:/home/docco/.ssh/authorized_keys:ro
       - docco-git:/git
       - docco-apps:/root/apps
+    networks:
+      - docker-proxy
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    privileged: true
+    networks:
+      - docker-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # only what docco needs: docker-compose up --build / down -v
+      - POST=1        # also gates DELETE (down -v)
+      - BUILD=1
+      - SESSION=1     # buildkit
+      - CONTAINERS=1
+      - IMAGES=1
+      - NETWORKS=1
+      - VOLUMES=1
+      - INFO=1
 
 networks:
   default:
     external: true
     name: nginx-proxy
+  docker-proxy:
+    internal: true
 
 volumes:
   letsencrypt-certs:
